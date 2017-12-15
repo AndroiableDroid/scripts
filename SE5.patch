@@ -1,0 +1,35 @@
+selinux: remove unnecessary pointer reassignment
+
+(cherry pick from commit 83d4a806ae46397f606de7376b831524bd3a21e5)
+
+Commit f01e1af445fa ("selinux: don't pass in NULL avd to avc_has_perm_noaudit")
+made this pointer reassignment unnecessary. Avd should continue to reference
+the stack-based copy.
+
+Signed-off-by: Jeff Vander Stoep <jeffv@google.com>
+Acked-by: Stephen Smalley <sds@tycho.nsa.gov>
+[PM: tweaked subject line]
+Signed-off-by: Paul Moore <pmoore@redhat.com>
+Bug: 22846070
+Change-Id: I4aef4b95820e813c370525310e37f5da22d25efc
+
+diff --git a/security/selinux/avc.c b/security/selinux/avc.c
+index c223a32..21e48ba 100644
+--- a/security/selinux/avc.c
++++ b/security/selinux/avc.c
+@@ -729,12 +729,10 @@
+ 	rcu_read_lock();
+ 
+ 	node = avc_lookup(ssid, tsid, tclass);
+-	if (unlikely(!node)) {
++	if (unlikely(!node))
+ 		node = avc_compute_av(ssid, tsid, tclass, avd);
+-	} else {
++	else
+ 		memcpy(avd, &node->ae.avd, sizeof(*avd));
+-		avd = &node->ae.avd;
+-	}
+ 
+ 	denied = requested & ~(avd->allowed);
+ 	if (unlikely(denied))
+

@@ -1,0 +1,23 @@
+Revert "SELinux: ss: Fix policy write for ioctl operations"
+
+This reverts commit 8cdfb356b51e29494ca0b9e4e86727d6f841a52d.
+
+Bug: 22846070
+Change-Id: I4dd2fd5a1d7fb3ae8f74a5decdf8fb9d5cd43def
+Signed-off-by: Jeff Vander Stoep <jeffv@google.com>
+
+diff --git a/security/selinux/ss/avtab.c b/security/selinux/ss/avtab.c
+index dd7466c..2e4ff00 100644
+--- a/security/selinux/ss/avtab.c
++++ b/security/selinux/ss/avtab.c
+@@ -565,9 +565,6 @@
+ 		return rc;
+ 
+ 	if (cur->key.specified & AVTAB_OP) {
+-		rc = put_entry(&cur->datum.u.ops->type, sizeof(u8), 1, fp);
+-		if (rc)
+-			return rc;
+ 		for (i = 0; i < ARRAY_SIZE(cur->datum.u.ops->op.perms); i++)
+ 			buf32[i] = cpu_to_le32(cur->datum.u.ops->op.perms[i]);
+ 		rc = put_entry(buf32, sizeof(u32),
+
